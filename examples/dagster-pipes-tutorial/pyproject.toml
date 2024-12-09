@@ -1,0 +1,28 @@
+[project]
+name = "dagster_pipes_tutorial"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "dagster",
+    "dagster-cloud",
+    "dagster-pipes>=1.9.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "dagster-webserver", 
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.dagster]
+module_name = "dagster_pipes_tutorial.definitions"
+project_name = "dagster_pipes_tutorial"
+
+[tool.setuptools.packages.find]
+exclude=["dagster_pipes_tutorial_tests"]
