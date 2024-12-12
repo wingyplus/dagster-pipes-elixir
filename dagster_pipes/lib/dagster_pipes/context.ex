@@ -6,9 +6,6 @@ defmodule DagsterPipes.Context do
   use GenServer
 
   defstruct [
-    :params_loader,
-    :context_loader,
-    :message_writer,
     :context_data,
     :message_channel
   ]
@@ -32,6 +29,7 @@ defmodule DagsterPipes.Context do
   @doc """
   Report to the Dagster that asset is materialized.
   """
+  # TODO: prevent calling this function twice. (Ref: https://github.com/dagster-io/dagster/blob/master/python_modules/dagster-pipes/dagster_pipes/__init__.py#L1626-L1631)
   def report_asset_materialization(
         context,
         metadata \\ nil,
@@ -71,14 +69,25 @@ defmodule DagsterPipes.Context do
 
   @impl GenServer
   def init(args) do
-    context = struct(__MODULE__, args)
+    {:ok, %__MODULE__{}, {:continue, args}}
+  end
 
-    context_params = DagsterPipes.ParamsLoader.load_context_params!(context.params_loader)
-    messages_params = DagsterPipes.ParamsLoader.load_messages_params!(context.params_loader)
-    context_data = DagsterPipes.ContextLoader.load_context(context.context_loader, context_params)
-    channel = DagsterPipes.MessageWriter.open(context.message_writer, messages_params)
-    :ok = write_message(channel, "opened", context.message_writer.get_opened_payload())
-    {:ok, %{context | context_data: context_data, message_channel: channel}}
+  @impl GenServer
+  def handle_continue(args, context) do
+    params_loader = Keyword.fetch!(args, :params_loader)
+    context_loader = Keyword.fetch!(args, :context_loader)
+    message_writer = Keyword.fetch!(args, :message_writer)
+
+    # Initialize context
+    context_params = DagsterPipes.ParamsLoader.load_context_params!(params_loader)
+    context_data = DagsterPipes.ContextLoader.load_context(context_loader, context_params)
+
+    # Initialize message channel
+    messages_params = DagsterPipes.ParamsLoader.load_messages_params!(params_loader)
+    channel = DagsterPipes.MessageWriter.open(message_writer, messages_params)
+    :ok = write_message(channel, "opened", message_writer.get_opened_payload())
+
+    {:noreply, %{context | context_data: context_data, message_channel: channel}}
   end
 
   @impl GenServer
