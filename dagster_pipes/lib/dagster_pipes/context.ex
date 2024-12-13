@@ -28,6 +28,13 @@ defmodule DagsterPipes.Context do
   end
 
   @doc """
+  A key-value map for all extras provided by the user.
+  """
+  def extras(context) do
+    GenServer.call(context, :extras)
+  end
+
+  @doc """
   Report to the Dagster that asset is materialized.
   """
   def report_asset_materialization(
@@ -93,6 +100,11 @@ defmodule DagsterPipes.Context do
   @impl GenServer
   def terminate(:normal, context) do
     write_message(context.message_channel, "closed", %{})
+  end
+
+  @impl GenServer
+  def handle_call(:extras, _from, context) do
+    {:reply, context.context_data.extras, context}
   end
 
   @impl GenServer
