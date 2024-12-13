@@ -7,7 +7,8 @@ defmodule DagsterPipes.Context do
 
   defstruct [
     :context_data,
-    :message_channel
+    :message_channel,
+    materialized_assets: MapSet.new()
   ]
 
   ## APIs
@@ -103,14 +104,19 @@ defmodule DagsterPipes.Context do
       ) do
     asset_key = resolve_asset_key(context, asset_key)
 
-    result =
-      write_message(context.message_channel, "report_asset_materialization", %{
-        metadata: metadata,
-        data_version: data_version,
-        asset_key: asset_key
-      })
+    if MapSet.member?(context.materialized_assets, asset_key) do
+      {:reply, {:error, :already_reported}, context}
+    else
+      result =
+        write_message(context.message_channel, "report_asset_materialization", %{
+          metadata: metadata,
+          data_version: data_version,
+          asset_key: asset_key
+        })
 
-    {:reply, result, context}
+      {:reply, result,
+       %{context | materialized_assets: MapSet.put(context.materialized_assets, asset_key)}}
+    end
   end
 
   @impl GenServer

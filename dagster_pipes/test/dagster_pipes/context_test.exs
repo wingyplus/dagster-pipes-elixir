@@ -15,28 +15,37 @@ defmodule DagsterPipes.ContextTest do
     %{context: context}
   end
 
-  test "report_asset_materialization/4", %{context: context} do
-    Context.report_asset_materialization(
-      context,
-      %{hello: %DagsterPipes.MetadataValue{raw_value: "world", type: "__infer__"}},
-      nil,
-      nil
-    )
+  describe "report_asset_materialization/4" do
+    test "report asset materialization", %{context: context} do
+      Context.report_asset_materialization(
+        context,
+        %{hello: %DagsterPipes.MetadataValue{raw_value: "world", type: "__infer__"}},
+        nil,
+        nil
+      )
 
-    assert_receive %DagsterPipes.Message{
-      __dagster_pipes_version: "0.1",
-      method: "opened",
-      params: %{}
-    }
-
-    assert_receive %DagsterPipes.Message{
-      __dagster_pipes_version: "0.1",
-      method: "report_asset_materialization",
-      params: %{
-        metadata: %{hello: %DagsterPipes.MetadataValue{type: "__infer__", raw_value: "world"}},
-        asset_key: "elixir_pipes",
-        data_version: nil
+      assert_receive %DagsterPipes.Message{
+        __dagster_pipes_version: "0.1",
+        method: "opened",
+        params: %{}
       }
-    }
+
+      assert_receive %DagsterPipes.Message{
+        __dagster_pipes_version: "0.1",
+        method: "report_asset_materialization",
+        params: %{
+          metadata: %{hello: %DagsterPipes.MetadataValue{type: "__infer__", raw_value: "world"}},
+          asset_key: "elixir_pipes",
+          data_version: nil
+        }
+      }
+    end
+
+    test "not allowed to report asset twice", %{context: context} do
+      metadata = %{hello: %DagsterPipes.MetadataValue{raw_value: "world", type: "__infer__"}}
+
+      assert :ok = Context.report_asset_materialization(context, metadata)
+      assert {:error, :already_reported} = Context.report_asset_materialization(context, metadata)
+    end
   end
 end
