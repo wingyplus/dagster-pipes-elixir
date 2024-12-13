@@ -9,7 +9,7 @@ defmodule DagsterPipes do
   def open(opts \\ []) do
     params_loader = opts[:params_loader] || DagsterPipes.ParamsLoader.init_from_env()
 
-    if DagsterPipes.ParamsLoader.dagster_pipes_process?(params_loader) do
+    if DagsterPipes.ParamsLoader.Protocol.dagster_pipes_process?(params_loader) do
       context_loader = opts[:context_loader] || DagsterPipes.DefaultContextLoader
       message_writer = opts[:message_writer] || DagsterPipes.DefaultMessageWriter
 

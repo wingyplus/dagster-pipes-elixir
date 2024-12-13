@@ -79,11 +79,11 @@ defmodule DagsterPipes.Context do
     message_writer = Keyword.fetch!(args, :message_writer)
 
     # Initialize context
-    context_params = DagsterPipes.ParamsLoader.load_context_params!(params_loader)
+    context_params = DagsterPipes.ParamsLoader.Protocol.load_context_params!(params_loader)
     context_data = DagsterPipes.ContextLoader.load_context(context_loader, context_params)
 
     # Initialize message channel
-    messages_params = DagsterPipes.ParamsLoader.load_messages_params!(params_loader)
+    messages_params = DagsterPipes.ParamsLoader.Protocol.load_messages_params!(params_loader)
     channel = DagsterPipes.MessageWriter.open(message_writer, messages_params)
     :ok = write_message(channel, "opened", message_writer.get_opened_payload())
 
