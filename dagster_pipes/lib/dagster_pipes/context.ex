@@ -30,7 +30,6 @@ defmodule DagsterPipes.Context do
   @doc """
   Report to the Dagster that asset is materialized.
   """
-  # TODO: prevent calling this function twice. (Ref: https://github.com/dagster-io/dagster/blob/master/python_modules/dagster-pipes/dagster_pipes/__init__.py#L1626-L1631)
   def report_asset_materialization(
         context,
         metadata \\ nil,
@@ -103,6 +102,7 @@ defmodule DagsterPipes.Context do
         context
       ) do
     asset_key = resolve_asset_key(context, asset_key)
+    metadata = normalize_metadata!(metadata)
 
     if MapSet.member?(context.materialized_assets, asset_key) do
       {:reply, {:error, :already_reported}, context}
@@ -156,5 +156,21 @@ defmodule DagsterPipes.Context do
     end
 
     asset_key
+  end
+
+  defp normalize_metadata!(metadata) do
+    Enum.into(metadata, %{}, &normalize_param_metadata!/1)
+  end
+
+  defp normalize_param_metadata!({key, value}) when is_binary(key) or is_atom(key) do
+    {key, normalize_value_metadata(value)}
+  end
+
+  defp normalize_value_metadata(%DagsterPipes.MetadataValue{} = value) do
+    value
+  end
+
+  defp normalize_value_metadata(value) do
+    DagsterPipes.MetadataValue.infer(value)
   end
 end
