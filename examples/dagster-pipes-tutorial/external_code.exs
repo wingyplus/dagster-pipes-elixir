@@ -18,7 +18,7 @@ defmodule Main do
     total_orders = DF.n_rows(orders_df)
 
     report_asset_materialization(context, %{
-      total_orders: %DagsterPipes.MetadataValue{raw_value: total_orders, type: "__infer__"}
+      total_orders: total_orders
     })
   end
 end
