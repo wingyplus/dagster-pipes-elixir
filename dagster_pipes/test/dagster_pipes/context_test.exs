@@ -46,6 +46,9 @@ defmodule DagsterPipes.ContextTest do
 
       assert :ok = Context.report_asset_materialization(context, metadata)
       assert {:error, :already_reported} = Context.report_asset_materialization(context, metadata)
+
+      {:messages, messages} = Process.info(self(), :messages)
+      assert [%{method: "opened"}, %{method: "report_asset_materialization"}] = messages
     end
   end
 end
