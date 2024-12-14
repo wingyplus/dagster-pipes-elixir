@@ -1,0 +1,6 @@
+{
+  "name": "dagster-pipes-elixir",
+  "engineVersion": "v0.15.1",
+  "sdk": "elixir",
+  "source": ".dagger"
+}
