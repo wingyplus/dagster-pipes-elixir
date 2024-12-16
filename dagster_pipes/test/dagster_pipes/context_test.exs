@@ -19,22 +19,22 @@ defmodule DagsterPipes.ContextTest do
     test "report asset materialization", %{context: context} do
       Context.report_asset_materialization(
         context,
-        %{hello: %DagsterPipes.MetadataValue{raw_value: "world", type: "__infer__"}},
+        %{hello: %DagsterPipes.PipesMetadataValue{type: :__infer__, raw_value: "world"}},
         nil,
         nil
       )
 
-      assert_receive %DagsterPipes.Message{
-        __dagster_pipes_version: "0.1",
-        method: "opened",
+      assert_receive %DagsterPipes.PipesMessage{
+        dagster_pipes_version: "0.1",
+        method: :opened,
         params: %{}
       }
 
-      assert_receive %DagsterPipes.Message{
-        __dagster_pipes_version: "0.1",
-        method: "report_asset_materialization",
+      assert_receive %DagsterPipes.PipesMessage{
+        dagster_pipes_version: "0.1",
+        method: :report_asset_materialization,
         params: %{
-          metadata: %{hello: %DagsterPipes.MetadataValue{type: "__infer__", raw_value: "world"}},
+          metadata: %{hello: %{"type" => "__infer__", "raw_value" => "world"}},
           asset_key: "elixir_pipes",
           data_version: nil
         }
@@ -42,23 +42,23 @@ defmodule DagsterPipes.ContextTest do
     end
 
     test "not allowed to report asset twice", %{context: context} do
-      metadata = %{hello: %DagsterPipes.MetadataValue{raw_value: "world", type: "__infer__"}}
+      metadata = %{hello: %{type: :__infer__, raw_value: "world"}}
 
       assert :ok = Context.report_asset_materialization(context, metadata)
       assert {:error, :already_reported} = Context.report_asset_materialization(context, metadata)
 
       {:messages, messages} = Process.info(self(), :messages)
-      assert [%{method: "opened"}, %{method: "report_asset_materialization"}] = messages
+      assert [%{method: :opened}, %{method: :report_asset_materialization}] = messages
     end
 
     test "report raw string value", %{context: context} do
       assert :ok = Context.report_asset_materialization(context, %{hello: "world"})
 
-      assert_receive %DagsterPipes.Message{
-        __dagster_pipes_version: "0.1",
-        method: "report_asset_materialization",
+      assert_receive %DagsterPipes.PipesMessage{
+        dagster_pipes_version: "0.1",
+        method: :report_asset_materialization,
         params: %{
-          metadata: %{hello: %DagsterPipes.MetadataValue{type: "__infer__", raw_value: "world"}},
+          metadata: %{hello: %{"type" => "__infer__", "raw_value" => "world"}},
           asset_key: "elixir_pipes",
           data_version: nil
         }
@@ -68,11 +68,11 @@ defmodule DagsterPipes.ContextTest do
     test "report raw integer value", %{context: context} do
       assert :ok = Context.report_asset_materialization(context, %{hello: 1})
 
-      assert_receive %DagsterPipes.Message{
-        __dagster_pipes_version: "0.1",
-        method: "report_asset_materialization",
+      assert_receive %DagsterPipes.PipesMessage{
+        dagster_pipes_version: "0.1",
+        method: :report_asset_materialization,
         params: %{
-          metadata: %{hello: %DagsterPipes.MetadataValue{type: "__infer__", raw_value: 1}},
+          metadata: %{hello: %{"type" => "__infer__", "raw_value" => 1}},
           asset_key: "elixir_pipes",
           data_version: nil
         }
@@ -82,11 +82,11 @@ defmodule DagsterPipes.ContextTest do
     test "report raw boolean value", %{context: context} do
       assert :ok = Context.report_asset_materialization(context, %{hello: true})
 
-      assert_receive %DagsterPipes.Message{
-        __dagster_pipes_version: "0.1",
-        method: "report_asset_materialization",
+      assert_receive %DagsterPipes.PipesMessage{
+        dagster_pipes_version: "0.1",
+        method: :report_asset_materialization,
         params: %{
-          metadata: %{hello: %DagsterPipes.MetadataValue{type: "__infer__", raw_value: true}},
+          metadata: %{hello: %{"type" => "__infer__", "raw_value" => true}},
           asset_key: "elixir_pipes",
           data_version: nil
         }

@@ -12,6 +12,6 @@ defmodule DagsterPipes.ContextLoader do
   @doc "Loads a context that injected by orchestrator process."
   def load_context(context_loader, params) do
     context_loader.load_context(params)
-    |> Nestru.decode!(DagsterPipes.ContextData)
+    |> DagsterPipes.PipesContextData.from_map()
   end
 end
