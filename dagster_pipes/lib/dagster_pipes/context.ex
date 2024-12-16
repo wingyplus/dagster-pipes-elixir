@@ -35,6 +35,13 @@ defmodule DagsterPipes.Context do
   end
 
   @doc """
+  The partition key for the currently scoped partition.
+  """
+  def partition_key(context) do
+    GenServer.call(context, :partition_key)
+  end
+
+  @doc """
   Report to the Dagster that asset is materialized.
   """
   def report_asset_materialization(
@@ -105,6 +112,11 @@ defmodule DagsterPipes.Context do
   @impl GenServer
   def handle_call(:extras, _from, context) do
     {:reply, context.context_data.extras, context}
+  end
+
+  @impl GenServer
+  def handle_call(:partition_key, _from, context) do
+    {:reply, context.context_data.partition_key, context}
   end
 
   @impl GenServer
