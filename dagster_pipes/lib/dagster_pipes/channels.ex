@@ -13,7 +13,7 @@ end
 defimpl DagsterPipes.MessageChannel, for: DagsterPipes.FileMessageWriterChannel do
   def write_message(channel, message) do
     f = File.open!(channel.path, [:append])
-    :ok = IO.binwrite(f, [Jason.encode!(message), ?\n])
+    :ok = IO.binwrite(f, [DagsterPipes.PipesMessage.to_json(message), ?\n])
     File.close(f)
   end
 end

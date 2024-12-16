@@ -99,14 +99,14 @@ defmodule DagsterPipes.Context do
     # Initialize message channel
     messages_params = DagsterPipes.ParamsLoader.Protocol.load_messages_params!(params_loader)
     channel = DagsterPipes.MessageWriter.open(message_writer, messages_params)
-    :ok = write_message(channel, "opened", message_writer.get_opened_payload())
+    :ok = write_message(channel, :opened, message_writer.get_opened_payload())
 
     {:noreply, %{context | context_data: context_data, message_channel: channel}}
   end
 
   @impl GenServer
   def terminate(:normal, context) do
-    write_message(context.message_channel, "closed", %{})
+    write_message(context.message_channel, :closed, %{})
   end
 
   @impl GenServer
@@ -132,7 +132,7 @@ defmodule DagsterPipes.Context do
       {:reply, {:error, :already_reported}, context}
     else
       result =
-        write_message(context.message_channel, "report_asset_materialization", %{
+        write_message(context.message_channel, :report_asset_materialization, %{
           metadata: metadata,
           data_version: data_version,
           asset_key: asset_key
@@ -160,18 +160,28 @@ defmodule DagsterPipes.Context do
   ## Helpers
 
   defp write_message(channel, method, params) do
-    DagsterPipes.MessageChannel.write_message(channel, DagsterPipes.Message.build(method, params))
+    DagsterPipes.MessageChannel.write_message(channel, build(method, params))
+  end
+
+  @pipes_protocol_version "0.1"
+
+  defp build(method, params) when is_atom(method) and is_map(params) do
+    %DagsterPipes.PipesMessage{
+      dagster_pipes_version: @pipes_protocol_version,
+      method: method,
+      params: params
+    }
   end
 
   defp resolve_asset_key(
-         %__MODULE__{context_data: %DagsterPipes.ContextData{asset_keys: [asset_key]}},
+         %__MODULE__{context_data: %DagsterPipes.PipesContextData{asset_keys: [asset_key]}},
          nil
        ) do
     asset_key
   end
 
   defp resolve_asset_key(
-         %__MODULE__{context_data: %DagsterPipes.ContextData{asset_keys: asset_keys}},
+         %__MODULE__{context_data: %DagsterPipes.PipesContextData{asset_keys: asset_keys}},
          asset_key
        )
        when is_binary(asset_key) do
@@ -187,14 +197,14 @@ defmodule DagsterPipes.Context do
   end
 
   defp normalize_param_metadata!({key, value}) when is_binary(key) or is_atom(key) do
-    {key, normalize_value_metadata(value)}
+    {key, normalize_value_metadata(value) |> DagsterPipes.PipesMetadataValue.to_map()}
   end
 
-  defp normalize_value_metadata(%DagsterPipes.MetadataValue{} = value) do
+  defp normalize_value_metadata(%DagsterPipes.PipesMetadataValue{} = value) do
     value
   end
 
   defp normalize_value_metadata(value) do
-    DagsterPipes.MetadataValue.infer(value)
+    %DagsterPipes.PipesMetadataValue{raw_value: value, type: :__infer__}
   end
 end
