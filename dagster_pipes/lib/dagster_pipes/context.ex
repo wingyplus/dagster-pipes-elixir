@@ -61,11 +61,11 @@ defmodule DagsterPipes.Context do
         context,
         check_name,
         passed,
-        severity \\ :error,
+        severity \\ :ERROR,
         metadata \\ nil,
         asset_key \\ nil
       )
-      when is_binary(check_name) and is_boolean(passed) do
+      when is_binary(check_name) and is_boolean(passed) and severity in [:WARN, :ERROR] do
     GenServer.call(
       context,
       {:report_asset_check, check_name, passed, severity, metadata, asset_key}
@@ -145,11 +145,23 @@ defmodule DagsterPipes.Context do
 
   @impl GenServer
   def handle_call(
-        {:report_asset_check, _check_name, _passed, _severity, _metadata, _asset_key},
+        {:report_asset_check, check_name, passed, severity, metadata, asset_key},
         _from,
-        _context
+        context
       ) do
-    raise "TODO"
+    asset_key = resolve_asset_key(context, asset_key)
+    metadata = normalize_metadata!(metadata)
+
+    result =
+      write_message(context.message_channel, :report_asset_check, %{
+        check_name: check_name,
+        passed: passed,
+        severity: severity,
+        metadata: metadata,
+        asset_key: asset_key
+      })
+
+    {:reply, result, context}
   end
 
   @impl GenServer
@@ -191,6 +203,8 @@ defmodule DagsterPipes.Context do
 
     asset_key
   end
+
+  defp normalize_metadata!(nil), do: nil
 
   defp normalize_metadata!(metadata) do
     Enum.into(metadata, %{}, &normalize_param_metadata!/1)

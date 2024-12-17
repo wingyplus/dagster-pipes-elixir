@@ -17,9 +17,12 @@ defmodule Main do
     orders_df = DF.new(%{order_id: [1, 2], item_id: [432, 878]})
     total_orders = DF.n_rows(orders_df)
 
-    report_asset_materialization(context, %{
+    meta = %{
       total_orders: total_orders
-    })
+    }
+
+    report_asset_materialization(context, meta)
+    report_asset_check(context, "total_orders", total_orders == 2, :ERROR, meta)
   end
 end
 

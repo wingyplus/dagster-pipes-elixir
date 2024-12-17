@@ -1,6 +1,7 @@
 import shutil
 
 from dagster import (
+    AssetCheckSpec,
     AssetExecutionContext,
     MaterializeResult,
     PipesSubprocessClient,
@@ -9,7 +10,7 @@ from dagster import (
 )
 
 
-@asset
+@asset(check_specs=[AssetCheckSpec(name="total_orders", asset="subprocess_assets")])
 def subprocess_assets(
     context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
 ) -> MaterializeResult:

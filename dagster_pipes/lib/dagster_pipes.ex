@@ -48,6 +48,17 @@ defmodule DagsterPipes do
               ),
               to: DagsterPipes.Context
 
+  @doc "See `DagsterPipes.Context.report_asset_check/6`."
+  defdelegate report_asset_check(
+                context,
+                check_name,
+                passed,
+                severity \\ :ERROR,
+                metadata \\ nil,
+                asset_key \\ nil
+              ),
+              to: DagsterPipes.Context
+
   @doc "See `DagsterPipes.Context.close/1`."
   defdelegate close(context), to: DagsterPipes.Context
 end
