@@ -8,6 +8,9 @@
 # Decode a JSON string: DagsterPipes.PipesException.from_json(data)
 # Encode into a JSON string: DagsterPipes.PipesException.to_json(struct)
 #
+# Decode a JSON string: DagsterPipes.PipesLogLevel.from_json(data)
+# Encode into a JSON string: DagsterPipes.PipesLogLevel.to_json(struct)
+#
 # Decode a JSON string: DagsterPipes.PipesMessage.from_json(data)
 # Encode into a JSON string: DagsterPipes.PipesMessage.to_json(struct)
 #
@@ -394,6 +397,55 @@ defmodule DagsterPipes.PipesException do
   def to_json(struct) do
     struct
     |> to_map()
+    |> Jason.encode!()
+  end
+end
+
+defmodule DagsterPipes.PipesLogLevel do
+  @valid_enum_members [
+    :CRITICAL,
+    :DEBUG,
+    :ERROR,
+    :INFO,
+    :WARNING
+  ]
+
+  def valid_atom?(value), do: value in @valid_enum_members
+
+  def valid_atom_string?(value) do
+    try do
+      atom = String.to_existing_atom(value)
+      atom in @valid_enum_members
+    rescue
+      ArgumentError -> false
+    end
+  end
+
+  def encode(value) do
+    if valid_atom?(value) do
+      Atom.to_string(value)
+    else
+      {:error, "Unexpected value when encoding atom: #{inspect(value)}"}
+    end
+  end
+
+  def decode(value) do
+    if valid_atom_string?(value) do
+      String.to_existing_atom(value)
+    else
+      {:error, "Unexpected value when decoding atom: #{inspect(value)}"}
+    end
+  end
+
+  def from_json(json) do
+    json
+    |> Jason.decode!()
+    |> decode()
+  end
+
+  def to_json(data) do
+    data
+    |> encode()
     |> Jason.encode!()
   end
 end

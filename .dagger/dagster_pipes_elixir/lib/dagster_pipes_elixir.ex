@@ -71,6 +71,6 @@ defmodule DagsterPipesElixir do
     |> Dagger.Client.git("https://github.com/dagster-io/community-integrations.git")
     |> Dagger.GitRepository.branch("main")
     |> Dagger.GitRef.tree()
-    |> Dagger.Directory.directory("libraries/pipes/implementations/rust/jsonschema/pipes")
+    |> Dagger.Directory.directory("libraries/pipes/jsonschema")
   end
 end
