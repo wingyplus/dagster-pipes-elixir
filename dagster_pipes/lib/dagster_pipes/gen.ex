@@ -146,13 +146,13 @@ defmodule DagsterPipes.PipesContextData do
   ]
 
   @type t :: %__MODULE__{
-          asset_keys: [String.t()] | nil | nil,
-          code_version_by_asset_key: %{String.t() => nil | String.t()} | nil | nil,
+          asset_keys: [String.t()] | nil,
+          code_version_by_asset_key: %{String.t() => nil | String.t()} | nil,
           extras: %{String.t() => any()} | nil,
-          job_name: nil | String.t() | nil,
-          partition_key: nil | String.t() | nil,
-          partition_key_range: DagsterPipes.PartitionKeyRange.t() | nil | nil,
-          partition_time_window: DagsterPipes.PartitionTimeWindow.t() | nil | nil,
+          job_name: String.t() | nil,
+          partition_key: String.t() | nil,
+          partition_key_range: DagsterPipes.PartitionKeyRange.t() | nil,
+          partition_time_window: DagsterPipes.PartitionTimeWindow.t() | nil,
           provenance_by_asset_key:
             %{String.t() => DagsterPipes.ProvenanceByAssetKey.t() | nil} | nil | nil,
           retry_number: integer(),
@@ -264,7 +264,7 @@ defmodule DagsterPipes.ContextClass do
           cause: DagsterPipes.PipesExceptionClass.t() | nil | nil,
           context: DagsterPipes.ContextClass.t() | nil,
           message: String.t() | nil,
-          name: nil | String.t() | nil,
+          name: String.t() | nil,
           stack: [String.t()] | nil
         }
 
@@ -314,7 +314,7 @@ defmodule DagsterPipes.PipesExceptionClass do
           cause: DagsterPipes.PipesExceptionClass.t() | nil | nil,
           context: DagsterPipes.ContextClass.t() | nil,
           message: String.t() | nil,
-          name: nil | String.t() | nil,
+          name: String.t() | nil,
           stack: [String.t()] | nil
         }
 
@@ -364,7 +364,7 @@ defmodule DagsterPipes.PipesException do
           cause: DagsterPipes.PipesExceptionClass.t() | nil | nil,
           context: DagsterPipes.ContextClass.t() | nil,
           message: String.t() | nil,
-          name: nil | String.t() | nil,
+          name: String.t() | nil,
           stack: [String.t()] | nil
         }
 
