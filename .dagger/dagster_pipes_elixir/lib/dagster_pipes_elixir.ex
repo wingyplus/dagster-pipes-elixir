@@ -29,7 +29,7 @@ defmodule DagsterPipesElixir do
     generated_file =
       quicktype()
       |> Dagger.Container.with_workdir("jsonschema")
-      |> Dagger.Container.with_directory(".", json_schema_dir())
+      |> Dagger.Container.with_directory(".", pipes_jsonschema())
       |> Dagger.Container.with_exec([
         "sh",
         "-c",
@@ -66,7 +66,7 @@ defmodule DagsterPipesElixir do
     |> Dagger.Container.from(@elixir_image)
   end
 
-  def json_schema_dir() do
+  def pipes_jsonschema() do
     dag()
     |> Dagger.Client.git("https://github.com/dagster-io/community-integrations.git")
     |> Dagger.GitRepository.branch("main")
