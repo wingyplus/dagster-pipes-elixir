@@ -1,0 +1,15 @@
+[project]
+name = "integration-tests"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dagster-pipes-tests",
+    "dagster-pipes>=1.9.5",
+    "dagster>=1.9.5",
+    "pytest>=8.3.4",
+]
+
+[tool.uv.sources]
+dagster-pipes-tests = { git = "https://github.com/dagster-io/community-integrations.git", subdirectory = "libraries/pipes/tests/dagster-pipes-tests", rev = "main" }
