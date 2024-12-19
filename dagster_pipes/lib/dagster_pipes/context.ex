@@ -207,18 +207,13 @@ defmodule DagsterPipes.Context do
   defp normalize_metadata!(nil), do: nil
 
   defp normalize_metadata!(metadata) do
-    Enum.into(metadata, %{}, &normalize_param_metadata!/1)
-  end
+    Enum.into(metadata, %{}, fn {key, value} ->
+      value =
+        value
+        |> DagsterPipes.MetadataValue.Protocol.to_metadata_value()
+        |> DagsterPipes.PipesMetadataValue.to_map()
 
-  defp normalize_param_metadata!({key, value}) when is_binary(key) or is_atom(key) do
-    {key, normalize_value_metadata(value) |> DagsterPipes.PipesMetadataValue.to_map()}
-  end
-
-  defp normalize_value_metadata(%DagsterPipes.PipesMetadataValue{} = value) do
-    value
-  end
-
-  defp normalize_value_metadata(value) do
-    %DagsterPipes.PipesMetadataValue{raw_value: value, type: :__infer__}
+      {key, value}
+    end)
   end
 end
