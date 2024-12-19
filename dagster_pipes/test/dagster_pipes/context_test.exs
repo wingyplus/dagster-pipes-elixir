@@ -58,7 +58,7 @@ defmodule DagsterPipes.ContextTest do
         dagster_pipes_version: "0.1",
         method: :report_asset_materialization,
         params: %{
-          metadata: %{hello: %{"type" => "__infer__", "raw_value" => "world"}},
+          metadata: %{hello: %{"type" => "text", "raw_value" => "world"}},
           asset_key: "elixir_pipes",
           data_version: nil
         }
@@ -72,7 +72,7 @@ defmodule DagsterPipes.ContextTest do
         dagster_pipes_version: "0.1",
         method: :report_asset_materialization,
         params: %{
-          metadata: %{hello: %{"type" => "__infer__", "raw_value" => 1}},
+          metadata: %{hello: %{"type" => "int", "raw_value" => 1}},
           asset_key: "elixir_pipes",
           data_version: nil
         }
@@ -86,7 +86,7 @@ defmodule DagsterPipes.ContextTest do
         dagster_pipes_version: "0.1",
         method: :report_asset_materialization,
         params: %{
-          metadata: %{hello: %{"type" => "__infer__", "raw_value" => true}},
+          metadata: %{hello: %{"type" => "bool", "raw_value" => true}},
           asset_key: "elixir_pipes",
           data_version: nil
         }
