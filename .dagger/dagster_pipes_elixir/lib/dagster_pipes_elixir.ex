@@ -10,16 +10,27 @@ defmodule DagsterPipesElixir do
   """
   defn test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Container.t() do
     elixir()
-    |> Dagger.Container.with_workdir("/dagster-pipes-elixir")
-    |> Dagger.Container.with_exec(~w"mix local.rebar --force")
-    |> Dagger.Container.with_exec(~w"mix local.hex --force")
-    |> Dagger.Container.with_mounted_directory(".", source)
+    |> with_source(source)
     |> Dagger.Container.with_workdir("dagster_pipes")
     |> Dagger.Container.with_env_variable("MIX_ENV", "test")
     |> Dagger.Container.with_exec(~w"mix deps.get")
     |> Dagger.Container.with_exec(~w"mix deps.compile")
     |> Dagger.Container.with_exec(~w"mix compile")
     |> Dagger.Container.with_exec(~w"mix test")
+  end
+
+  @doc """
+  Run integration tests provided by Dagster.
+  """
+  defn integration_test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Container.t() do
+    elixir()
+    |> with_source(source)
+    |> Dagger.Container.with_workdir("integration_tests")
+    |> Dagger.Container.with_env_variable("PATH", "/root/.local/bin:$PATH", expand: true)
+    |> Dagger.Container.with_exec(~w"apt update")
+    |> Dagger.Container.with_exec(~w"apt install -y --no-install-recommends curl git")
+    |> Dagger.Container.with_exec(["sh", "-c", "curl -LsSf https://astral.sh/uv/install.sh | sh"])
+    |> Dagger.Container.with_exec(~w"uv run pytest")
   end
 
   @doc """
@@ -64,6 +75,14 @@ defmodule DagsterPipesElixir do
     dag()
     |> Dagger.Client.container()
     |> Dagger.Container.from(@elixir_image)
+    |> Dagger.Container.with_exec(~w"mix local.rebar --force")
+    |> Dagger.Container.with_exec(~w"mix local.hex --force")
+  end
+
+  def with_source(container, source) do
+    container
+    |> Dagger.Container.with_workdir("/dagster-pipes-elixir")
+    |> Dagger.Container.with_mounted_directory(".", source)
   end
 
   def pipes_jsonschema() do
