@@ -29,9 +29,18 @@ defmodule DagsterPipes.PipesTest do
     GenServer.call(pid, :job_name)
   end
 
+  def with_asset_materialization(pid, materialization) do
+    GenServer.call(pid, {:asset_materialization, materialization})
+  end
+
+  def asset_materialization(pid) do
+    GenServer.call(pid, :asset_materialization)
+  end
+
   def run(pid, context) do
     test_extras(extras(pid), DagsterPipes.Context.extras(context))
     test_job_name(job_name(pid), DagsterPipes.Context.job_name(context))
+    test_asset_materialization(asset_materialization(pid), context)
   end
 
   def test_extras(nil, _), do: :ok
@@ -39,6 +48,41 @@ defmodule DagsterPipes.PipesTest do
 
   def test_job_name(nil, _), do: :ok
   def test_job_name(job_name, job_name), do: :ok
+
+  def test_asset_materialization(nil, _), do: :ok
+
+  def test_asset_materialization(asset_materialization, context) do
+    DagsterPipes.Context.report_asset_materialization(
+      context,
+      build_metadata(),
+      asset_materialization["dataVersion"],
+      asset_materialization["assetKey"]
+    )
+  end
+
+  defp build_metadata() do
+    %{
+      float: 0.1,
+      int: 1,
+      text: "hello",
+      notebook: DagsterPipes.MetadataValue.notebook("notebook.ipynb"),
+      path: DagsterPipes.MetadataValue.path("/dev/null"),
+      md: DagsterPipes.MetadataValue.markdown("**markdown**"),
+      bool_true: true,
+      bool_false: false,
+      asset: DagsterPipes.MetadataValue.asset("foo/bar"),
+      dagster_run: DagsterPipes.MetadataValue.dagster_run("db892d7f-0031-4747-973d-22e8b9095d9d"),
+      null: nil,
+      url: URI.parse("https://dagster.io"),
+      json: %{
+        "foo" => "bar",
+        "baz" => 1,
+        "qux" => [1, 2, 3],
+        "quux" => %{"a" => 1, "b" => 2},
+        "corge" => nil
+      }
+    }
+  end
 
   @impl true
   def init(_) do
@@ -74,6 +118,16 @@ defmodule DagsterPipes.PipesTest do
   def handle_call(:job_name, _from, state) do
     {:reply, state[:job_name], state}
   end
+
+  @impl true
+  def handle_call({:asset_materialization, materialization}, _from, state) do
+    {:reply, :ok, Map.put(state, :asset_materialization, materialization)}
+  end
+
+  @impl true
+  def handle_call(:asset_materialization, _from, state) do
+    {:reply, state[:asset_materialization], state}
+  end
 end
 
 defmodule MainTest do
@@ -102,6 +156,12 @@ defmodule MainTest do
 
   defp set_options({:job_name, job_name}, pid) do
     DagsterPipes.PipesTest.with_job_name(pid, job_name)
+    pid
+  end
+
+  defp set_options({:report_asset_materialization, materialization_json_path}, pid) do
+    materialization = materialization_json_path |> File.read!() |> Jason.decode!()
+    DagsterPipes.PipesTest.with_asset_materialization(pid, materialization)
     pid
   end
 
