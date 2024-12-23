@@ -37,10 +37,19 @@ defmodule DagsterPipes.PipesTest do
     GenServer.call(pid, :asset_materialization)
   end
 
+  def with_asset_check(pid, asset_check) do
+    GenServer.call(pid, {:asset_check, asset_check})
+  end
+
+  def asset_check(pid) do
+    GenServer.call(pid, :asset_check)
+  end
+
   def run(pid, context) do
     test_extras(extras(pid), DagsterPipes.Context.extras(context))
     test_job_name(job_name(pid), DagsterPipes.Context.job_name(context))
     test_asset_materialization(asset_materialization(pid), context)
+    test_asset_check(asset_check(pid), context)
   end
 
   def test_extras(nil, _), do: :ok
@@ -59,6 +68,23 @@ defmodule DagsterPipes.PipesTest do
       asset_materialization["assetKey"]
     )
   end
+
+  def test_asset_check(nil, _), do: :ok
+
+  def test_asset_check(asset_check, context) do
+    # test
+    DagsterPipes.Context.report_asset_check(
+      context,
+      asset_check["checkName"],
+      asset_check["passed"],
+      severity_from_string(asset_check["severity"]),
+      build_metadata(),
+      asset_check["assetKey"]
+    )
+  end
+
+  defp severity_from_string("WARN"), do: :WARN
+  defp severity_from_string("ERROR"), do: :ERROR
 
   defp build_metadata() do
     %{
@@ -128,6 +154,16 @@ defmodule DagsterPipes.PipesTest do
   def handle_call(:asset_materialization, _from, state) do
     {:reply, state[:asset_materialization], state}
   end
+
+  @impl true
+  def handle_call({:asset_check, asset_check}, _from, state) do
+    {:reply, :ok, Map.put(state, :asset_check, asset_check)}
+  end
+
+  @impl true
+  def handle_call(:asset_check, _from, state) do
+    {:reply, state[:asset_check], state}
+  end
 end
 
 defmodule MainTest do
@@ -162,6 +198,12 @@ defmodule MainTest do
   defp set_options({:report_asset_materialization, materialization_json_path}, pid) do
     materialization = materialization_json_path |> File.read!() |> Jason.decode!()
     DagsterPipes.PipesTest.with_asset_materialization(pid, materialization)
+    pid
+  end
+
+  defp set_options({:report_asset_check, asset_check_path}, pid) do
+    asset_check = asset_check_path |> File.read!() |> Jason.decode!()
+    DagsterPipes.PipesTest.with_asset_check(pid, asset_check)
     pid
   end
 
