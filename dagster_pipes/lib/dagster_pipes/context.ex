@@ -31,14 +31,24 @@ defmodule DagsterPipes.Context do
   A key-value map for all extras provided by the user.
   """
   def extras(context) do
-    GenServer.call(context, :extras)
+    context_data = GenServer.call(context, :context_data)
+    context_data.extras
   end
 
   @doc """
   The partition key for the currently scoped partition.
   """
   def partition_key(context) do
-    GenServer.call(context, :partition_key)
+    context_data = GenServer.call(context, :context_data)
+    context_data.partition_key
+  end
+
+  @doc """
+  The job name for the currently executing run.
+  """
+  def job_name(context) do
+    context_data = GenServer.call(context, :context_data)
+    context_data.job_name
   end
 
   @doc """
@@ -110,13 +120,8 @@ defmodule DagsterPipes.Context do
   end
 
   @impl GenServer
-  def handle_call(:extras, _from, context) do
-    {:reply, context.context_data.extras, context}
-  end
-
-  @impl GenServer
-  def handle_call(:partition_key, _from, context) do
-    {:reply, context.context_data.partition_key, context}
+  def handle_call(:context_data, _from, context) do
+    {:reply, context.context_data, context}
   end
 
   @impl GenServer
