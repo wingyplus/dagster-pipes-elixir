@@ -170,8 +170,9 @@ defmodule DagsterPipes.Context do
   end
 
   @impl GenServer
-  def handle_call({:report_custom_message, _payload}, _from, _context) do
-    raise "TODO"
+  def handle_call({:report_custom_message, payload}, _from, context) do
+    result = write_message(context.message_channel, :report_custom_message, %{payload: payload})
+    {:reply, result, context}
   end
 
   ## Helpers

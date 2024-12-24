@@ -45,11 +45,20 @@ defmodule DagsterPipes.PipesTest do
     GenServer.call(pid, :asset_check)
   end
 
+  def with_custom_payload(pid, custom_payload) do
+    GenServer.call(pid, {:custom_payload, custom_payload})
+  end
+
+  def custom_payload(pid) do
+    GenServer.call(pid, :custom_payload)
+  end
+
   def run(pid, context) do
     test_extras(extras(pid), DagsterPipes.Context.extras(context))
     test_job_name(job_name(pid), DagsterPipes.Context.job_name(context))
     test_asset_materialization(asset_materialization(pid), context)
     test_asset_check(asset_check(pid), context)
+    test_custom_payload(custom_payload(pid), context)
   end
 
   def test_extras(nil, _), do: :ok
@@ -72,7 +81,6 @@ defmodule DagsterPipes.PipesTest do
   def test_asset_check(nil, _), do: :ok
 
   def test_asset_check(asset_check, context) do
-    # test
     DagsterPipes.Context.report_asset_check(
       context,
       asset_check["checkName"],
@@ -81,6 +89,12 @@ defmodule DagsterPipes.PipesTest do
       build_metadata(),
       asset_check["assetKey"]
     )
+  end
+
+  def test_custom_payload(nil, _), do: :ok
+
+  def test_custom_payload(custom_payload, context) do
+    DagsterPipes.Context.report_custom_message(context, custom_payload)
   end
 
   defp severity_from_string("WARN"), do: :WARN
@@ -164,6 +178,16 @@ defmodule DagsterPipes.PipesTest do
   def handle_call(:asset_check, _from, state) do
     {:reply, state[:asset_check], state}
   end
+
+  @impl true
+  def handle_call({:custom_payload, custom_payload}, _from, state) do
+    {:reply, :ok, Map.put(state, :custom_payload, custom_payload)}
+  end
+
+  @impl true
+  def handle_call(:custom_payload, _from, state) do
+    {:reply, state[:custom_payload], state}
+  end
 end
 
 defmodule MainTest do
@@ -204,6 +228,12 @@ defmodule MainTest do
   defp set_options({:report_asset_check, asset_check_path}, pid) do
     asset_check = asset_check_path |> File.read!() |> Jason.decode!()
     DagsterPipes.PipesTest.with_asset_check(pid, asset_check)
+    pid
+  end
+
+  defp set_options({:custom_payload_path, custom_payload_path}, pid) do
+    custom_payload = custom_payload_path |> File.read!() |> Jason.decode!()
+    DagsterPipes.PipesTest.with_custom_payload(pid, custom_payload["payload"])
     pid
   end
 
