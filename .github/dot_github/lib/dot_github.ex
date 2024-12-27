@@ -25,7 +25,8 @@ defmodule DotGithub do
       |> Dagger.Client.gha()
       |> Dagger.Gha.job(
         "Run Test",
-        "dagger call test"
+        "dagger call test",
+        runner: ["ubuntu-latest"]
       )
     )
   end
