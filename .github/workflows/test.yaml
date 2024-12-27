@@ -1,0 +1,25 @@
+name: test
+
+on: 
+  pull_request:
+    branches: [main]
+
+jobs:
+  test: 
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: unit-test
+        uses: dagger/dagger-for-github@v6.15.1
+        with:
+          version: 0.15.1
+          verb: call
+          args: test
+      - name: integration-test
+        uses: dagger/dagger-for-github@v6.15.1
+        with:
+          version: 0.15.1
+          verb: call
+          args: integration-test
