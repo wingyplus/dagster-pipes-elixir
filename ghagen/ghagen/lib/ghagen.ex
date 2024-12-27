@@ -9,14 +9,11 @@ defmodule Ghagen do
   Initialize GHA module with automatic setup module dependencies and example.
   """
   defn init(lang: String.t()) :: Dagger.Directory.t() do
-    # TODO: create .github.
-    # TODO: bootstraping code.
-    # TODO: pre-generate workflow files.
-    # TODO: export the directory.
     with :ok <- ensure_lang_valid(lang) do
       dag()
       |> Dagger.Client.container()
       |> init_sdk(lang)
+      |> bootstraping_code(lang)
       |> Dagger.Container.directory("/dot-github")
     end
   end
@@ -24,7 +21,6 @@ defmodule Ghagen do
   defp init_sdk(container, lang) do
     container
     |> Dagger.Container.from("alpine")
-    # |> with_docker()
     |> with_dagger()
     |> Dagger.Container.with_workdir("/dot-github")
     |> Dagger.Container.with_exec(~w"dagger init --sdk=#{lang} --name=dot-github --source=.",
@@ -43,6 +39,10 @@ defmodule Ghagen do
     address = ["unix:///var/run/buildkit/buildkitd.sock", "tcp://0.0.0.0:1234"]
     """
 
+    cache_volume =
+      dag()
+      |> Dagger.Client.cache_volume("ghagen-dagger")
+
     dagger =
       dag()
       |> Dagger.Client.container()
@@ -55,6 +55,7 @@ defmodule Ghagen do
     dagger_engine =
       dagger
       |> Dagger.Container.with_new_file("/etc/dagger/engine.toml", engine_toml)
+      |> Dagger.Container.with_mounted_cache("/var/lib/dagger", cache_volume)
       |> Dagger.Container.with_exposed_port(1234, protocol: Dagger.NetworkProtocol.tcp())
       |> Dagger.Container.as_service(
         use_entrypoint: true,
@@ -73,4 +74,13 @@ defmodule Ghagen do
 
   defp ensure_lang_valid("elixir"), do: :ok
   defp ensure_lang_valid(lang), do: {:error, "Initialize with language #{lang} is not support"}
+
+  @templates_dir Path.join(:code.priv_dir(:ghagen), "templates")
+
+  defp bootstraping_code(container, "elixir") do
+    source = Path.join(@templates_dir, "dot_github.ex") |> File.read!()
+
+    container
+    |> Dagger.Container.with_new_file("dot_github/lib/dot_github.ex", source)
+  end
 end

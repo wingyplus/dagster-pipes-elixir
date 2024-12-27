@@ -1,0 +1,13 @@
+{
+  "name": "dot-github",
+  "engineVersion": "v0.15.1",
+  "sdk": "elixir",
+  "dependencies": [
+    {
+      "name": "gha",
+      "source": "github.com/dagger/dagger/modules/gha",
+      "pin": "c22c55d0526ef416a94a8d841bacc0f78f76d702"
+    }
+  ],
+  "source": "."
+}
