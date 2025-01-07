@@ -2,6 +2,9 @@
 #
 # Add Jason to your mix.exs
 #
+# Decode a JSON string: DagsterPipes.AssetCheckSeverity.from_json(data)
+# Encode into a JSON string: DagsterPipes.AssetCheckSeverity.to_json(struct)
+#
 # Decode a JSON string: DagsterPipes.PipesContextData.from_json(data)
 # Encode into a JSON string: DagsterPipes.PipesContextData.to_json(struct)
 #
@@ -16,6 +19,52 @@
 #
 # Decode a JSON string: DagsterPipes.PipesMetadataValue.from_json(data)
 # Encode into a JSON string: DagsterPipes.PipesMetadataValue.to_json(struct)
+
+defmodule DagsterPipes.AssetCheckSeverity do
+  @valid_enum_members [
+    :ERROR,
+    :WARN
+  ]
+
+  def valid_atom?(value), do: value in @valid_enum_members
+
+  def valid_atom_string?(value) do
+    try do
+      atom = String.to_existing_atom(value)
+      atom in @valid_enum_members
+    rescue
+      ArgumentError -> false
+    end
+  end
+
+  def encode(value) do
+    if valid_atom?(value) do
+      Atom.to_string(value)
+    else
+      {:error, "Unexpected value when encoding atom: #{inspect(value)}"}
+    end
+  end
+
+  def decode(value) do
+    if valid_atom_string?(value) do
+      String.to_existing_atom(value)
+    else
+      {:error, "Unexpected value when decoding atom: #{inspect(value)}"}
+    end
+  end
+
+  def from_json(json) do
+    json
+    |> Jason.decode!()
+    |> decode()
+  end
+
+  def to_json(data) do
+    data
+    |> encode()
+    |> Jason.encode!()
+  end
+end
 
 defmodule DagsterPipes.PartitionKeyRange do
   defstruct [:partition_key_range_end, :start]
