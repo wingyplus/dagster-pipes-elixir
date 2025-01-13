@@ -4,3 +4,6 @@ error_reporting = true
 [message_channel]
 s3 = false
 databricks = false
+
+[messages]
+log = false

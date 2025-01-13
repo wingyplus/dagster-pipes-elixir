@@ -261,11 +261,11 @@ defmodule MainTest do
     parse_options(argv, [{:env, true} | acc])
   end
 
-  def parse_options(["--jobName", value | argv], acc) when is_binary(value) do
+  def parse_options(["--job-name", value | argv], acc) when is_binary(value) do
     parse_options(argv, [{:job_name, value} | acc])
   end
 
-  def parse_options(["--jobName=" <> value | argv], acc) when is_binary(value) do
+  def parse_options(["--job-name=" <> value | argv], acc) when is_binary(value) do
     parse_options(argv, [{:job_name, value} | acc])
   end
 
@@ -281,11 +281,11 @@ defmodule MainTest do
     parse_options(argv, [{:full, true} | acc])
   end
 
-  def parse_options(["--custom-payload-path", value | argv], acc) when is_binary(value) do
+  def parse_options(["--custom-payload", value | argv], acc) when is_binary(value) do
     parse_options(argv, [{:custom_payload_path, value} | acc])
   end
 
-  def parse_options(["--custom-payload-path=" <> value | argv], acc) when is_binary(value) do
+  def parse_options(["--custom-payload=" <> value | argv], acc) when is_binary(value) do
     parse_options(argv, [{:custom_payload_path, value} | acc])
   end
 
@@ -329,6 +329,14 @@ defmodule MainTest do
 
   def parse_options(["--context-loader=" <> value | argv], acc) when is_binary(value) do
     parse_options(argv, [{:context_loader, value} | acc])
+  end
+
+  def parse_options(["--test-name", value | argv], acc) when is_binary(value) do
+    parse_options(argv, [{:test_name, value} | acc])
+  end
+
+  def parse_options(["--test-name=" <> value | argv], acc) when is_binary(value) do
+    parse_options(argv, [{:test_name, value} | acc])
   end
 end
 

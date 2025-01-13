@@ -8,7 +8,7 @@ defmodule DagsterPipesElixir do
   @doc """
   Test `dagster_pipes` project.
   """
-  defn test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Container.t() do
+  defn test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Void.t() do
     elixir()
     |> with_source(source)
     |> Dagger.Container.with_workdir("dagster_pipes")
@@ -17,12 +17,13 @@ defmodule DagsterPipesElixir do
     |> Dagger.Container.with_exec(~w"mix deps.compile")
     |> Dagger.Container.with_exec(~w"mix compile")
     |> Dagger.Container.with_exec(~w"mix test")
+    |> Dagger.Container.sync()
   end
 
   @doc """
   Run integration tests provided by Dagster.
   """
-  defn integration_test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Container.t() do
+  defn integration_test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Void.t() do
     elixir()
     |> with_source(source)
     |> Dagger.Container.with_workdir("integration_tests")
@@ -31,6 +32,7 @@ defmodule DagsterPipesElixir do
     |> Dagger.Container.with_exec(~w"apt install -y --no-install-recommends curl git")
     |> Dagger.Container.with_exec(["sh", "-c", "curl -LsSf https://astral.sh/uv/install.sh | sh"])
     |> Dagger.Container.with_exec(~w"uv run pytest")
+    |> Dagger.Container.sync()
   end
 
   @doc """

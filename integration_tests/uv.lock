@@ -429,7 +429,7 @@ wheels = [
 [[package]]
 name = "dagster-pipes-tests"
 version = "0.1.0"
-source = { git = "https://github.com/dagster-io/community-integrations.git?subdirectory=libraries%2Fpipes%2Ftests%2Fdagster-pipes-tests&rev=main#3ee24de45dd116f94e3e0077b651bbda5fea86b6" }
+source = { git = "https://github.com/dagster-io/community-integrations.git?subdirectory=libraries%2Fpipes%2Ftests%2Fdagster-pipes-tests&rev=main#b9675a62a9766c4b13cf5c39413e20f99604fadf" }
 dependencies = [
     { name = "boto3" },
     { name = "boto3-stubs", extra = ["s3"] },
