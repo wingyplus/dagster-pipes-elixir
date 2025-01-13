@@ -31,11 +31,25 @@ defmodule DagsterPipes do
   @doc """
   Similar to `open/1` but send a context to a `fun` and close the context after the `fun` is done.
   """
+  @deprecated "Uses run/2 instead."
   def open(fun, opts) when is_function(fun, 1) do
+    run(fun, opts)
+  end
+
+  @doc """
+  Similar to `open/1` but send a context to a `fun` and close the context after the `fun` is done.
+  """
+  def run(fun, opts \\ []) when is_function(fun, 1) do
     with {:ok, context} = open(opts) do
-      result = fun.(context)
-      close(context)
-      result
+      try do
+        result = fun.(context)
+        DagsterPipes.Context.close(context)
+        result
+      rescue
+        e ->
+          DagsterPipes.Context.close(context, e, __STACKTRACE__)
+          reraise e, __STACKTRACE__
+      end
     end
   end
 

@@ -21,9 +21,11 @@ defmodule Main do
       total_orders: total_orders
     }
 
+    raise "Hello"
+
     report_asset_materialization(context, meta)
     report_asset_check(context, "total_orders", total_orders == 2, :ERROR, meta)
   end
 end
 
-DagsterPipes.open(&Main.run/1, [])
+DagsterPipes.run(&Main.run/1)

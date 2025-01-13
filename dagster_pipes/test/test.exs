@@ -53,12 +53,21 @@ defmodule DagsterPipes.PipesTest do
     GenServer.call(pid, :custom_payload)
   end
 
+  def with_test_name(pid, name) do
+    GenServer.call(pid, {:test_name, name})
+  end
+
+  def test_name(pid) do
+    GenServer.call(pid, :test_name)
+  end
+
   def run(pid, context) do
     test_extras(extras(pid), DagsterPipes.Context.extras(context))
     test_job_name(job_name(pid), DagsterPipes.Context.job_name(context))
     test_asset_materialization(asset_materialization(pid), context)
     test_asset_check(asset_check(pid), context)
     test_custom_payload(custom_payload(pid), context)
+    test_error_reporting(test_name(pid), context)
   end
 
   def test_extras(nil, _), do: :ok
@@ -96,6 +105,12 @@ defmodule DagsterPipes.PipesTest do
   def test_custom_payload(custom_payload, context) do
     DagsterPipes.Context.report_custom_message(context, custom_payload)
   end
+
+  def test_error_reporting("test_error_reporting", _) do
+    raise "Very bad error has happened!"
+  end
+
+  def test_error_reporting(_, _), do: :ok
 
   defp severity_from_string("WARN"), do: :WARN
   defp severity_from_string("ERROR"), do: :ERROR
@@ -188,6 +203,16 @@ defmodule DagsterPipes.PipesTest do
   def handle_call(:custom_payload, _from, state) do
     {:reply, state[:custom_payload], state}
   end
+
+  @impl true
+  def handle_call({:test_name, name}, _from, state) do
+    {:reply, :ok, Map.put(state, :test_name, name)}
+  end
+
+  @impl true
+  def handle_call(:test_name, _from, state) do
+    {:reply, state[:test_name], state}
+  end
 end
 
 defmodule MainTest do
@@ -200,7 +225,7 @@ defmodule MainTest do
   def execute(options) do
     {:ok, pid} = DagsterPipes.PipesTest.start_link()
     pid = Enum.reduce(options, pid, &set_options/2)
-    DagsterPipes.open(&DagsterPipes.PipesTest.run(pid, &1), [])
+    DagsterPipes.run(&DagsterPipes.PipesTest.run(pid, &1))
   end
 
   defp set_options({:extras, extras}, pid) do
@@ -234,6 +259,11 @@ defmodule MainTest do
   defp set_options({:custom_payload_path, custom_payload_path}, pid) do
     custom_payload = custom_payload_path |> File.read!() |> Jason.decode!()
     DagsterPipes.PipesTest.with_custom_payload(pid, custom_payload["payload"])
+    pid
+  end
+
+  defp set_options({:test_name, name}, pid) do
+    DagsterPipes.PipesTest.with_test_name(pid, name)
     pid
   end
 

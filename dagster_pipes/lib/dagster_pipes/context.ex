@@ -8,7 +8,8 @@ defmodule DagsterPipes.Context do
   defstruct [
     :context_data,
     :message_channel,
-    materialized_assets: MapSet.new()
+    materialized_assets: MapSet.new(),
+    closed?: false
   ]
 
   ## APIs
@@ -23,8 +24,10 @@ defmodule DagsterPipes.Context do
   @doc """
   Closes the pipes connection.
   """
-  def close(context) do
+  def close(context, exception \\ nil, stacktrace \\ []) do
+    result = GenServer.call(context, {:close, exception, stacktrace})
     GenServer.stop(context)
+    result
   end
 
   @doc """
@@ -116,7 +119,29 @@ defmodule DagsterPipes.Context do
 
   @impl GenServer
   def terminate(:normal, context) do
-    write_message(context.message_channel, :closed, %{})
+    if not context.closed? do
+      raise "The context is not closed. Plase make sure its call `DagsterPipes.Context.close(context)` to cleanup resource."
+    end
+
+    :ok
+  end
+
+  def handle_call({:close, exception, stacktrace}, _from, context) do
+    params = %{}
+
+    params =
+      if exception do
+        Map.put(
+          params,
+          :exception,
+          DagsterPipes.PipesException.to_map(to_pipes_exception(exception, stacktrace))
+        )
+      else
+        params
+      end
+
+    result = write_message(context.message_channel, :closed, params)
+    {:reply, result, %{context | closed?: true}}
   end
 
   @impl GenServer
@@ -221,5 +246,16 @@ defmodule DagsterPipes.Context do
 
       {key, value}
     end)
+  end
+
+  defp to_pipes_exception(exception, stacktrace) do
+    %DagsterPipes.PipesException{
+      message: Exception.message(exception),
+      name: exception.__struct__,
+      stack:
+        stacktrace
+        |> Exception.format_stacktrace()
+        |> String.split("\n", trim: true)
+    }
   end
 end
