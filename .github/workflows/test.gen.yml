@@ -170,5 +170,5 @@ jobs:
 
                 exit $EXIT_CODE
               env:
-                COMMAND: dagger call -q dagger call test
+                COMMAND: dagger call -q test
               shell: bash
