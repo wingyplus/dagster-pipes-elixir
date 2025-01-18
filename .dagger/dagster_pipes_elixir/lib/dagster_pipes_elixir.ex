@@ -28,6 +28,7 @@ defmodule DagsterPipesElixir do
     |> with_source(source)
     |> Dagger.Container.with_workdir("integration_tests")
     |> Dagger.Container.with_env_variable("PATH", "/root/.local/bin:$PATH", expand: true)
+    |> Dagger.Container.with_env_variable("UV_LINK_MODE", "copy")
     |> Dagger.Container.with_exec(~w"apt update")
     |> Dagger.Container.with_exec(~w"apt install -y --no-install-recommends curl git")
     |> Dagger.Container.with_exec(["sh", "-c", "curl -LsSf https://astral.sh/uv/install.sh | sh"])
