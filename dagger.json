@@ -1,6 +1,6 @@
 {
   "name": "dagster-pipes-elixir",
-  "sdk": "elixir@21bdd152deeec875a7bb765f37cf16f7987db430",
-  "source": ".dagger",
-  "engineVersion": "v0.13.5"
+  "engineVersion": "v0.15.2",
+  "sdk": "elixir",
+  "source": ".dagger"
 }

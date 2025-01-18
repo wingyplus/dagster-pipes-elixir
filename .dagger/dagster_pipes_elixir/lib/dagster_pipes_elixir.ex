@@ -6,9 +6,9 @@ defmodule DagsterPipesElixir do
   use Dagger.Mod.Object, name: "DagsterPipesElixir"
 
   @doc """
-  Test `dagster_pipes` project.
+  Run unit test in `dagster_pipes` project.
   """
-  defn test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Void.t() do
+  defn unit_test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Void.t() do
     elixir()
     |> with_source(source)
     |> Dagger.Container.with_workdir("dagster_pipes")
@@ -33,6 +33,17 @@ defmodule DagsterPipesElixir do
     |> Dagger.Container.with_exec(["sh", "-c", "curl -LsSf https://astral.sh/uv/install.sh | sh"])
     |> Dagger.Container.with_exec(~w"uv run pytest")
     |> Dagger.Container.sync()
+  end
+
+  defn check(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Void.t() do
+    results =
+      [
+        Task.async(fn -> unit_test(source) end),
+        Task.async(fn -> integration_test(source) end)
+      ]
+      |> Task.await_many(:infinity)
+
+    Enum.find(results, &match?({:error, _}, &1)) || :ok
   end
 
   @doc """
