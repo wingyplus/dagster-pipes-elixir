@@ -1,6 +1,6 @@
 defmodule DagsterPipes do
   @moduledoc """
-  DagsterPipes allows you to integrate Elixir code with Dagster through [Dagster Pipes](https://docs.dagster.io/concepts/dagster-pipes).
+  The Elixir protocol implementation for [Dagster Pipes](https://docs.dagster.io/concepts/dagster-pipes).
   """
 
   @doc """

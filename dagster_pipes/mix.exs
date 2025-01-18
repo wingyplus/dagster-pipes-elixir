@@ -8,7 +8,8 @@ defmodule DagsterPipes.MixProject do
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
-      deps: deps()
+      deps: deps(),
+      package: package()
     ]
   end
 
@@ -25,7 +26,17 @@ defmodule DagsterPipes.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
+  end
+
+  defp package() do
+    %{
+      name: "dagster_pipes",
+      description: "The Elixir protocol implementation for Dagster Pipes.",
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => "https://github.com/wingyplus/dagster-pipes-elixir"}
+    }
   end
 end
