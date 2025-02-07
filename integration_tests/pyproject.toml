@@ -12,4 +12,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-dagster-pipes-tests = { git = "https://github.com/dagster-io/community-integrations.git", subdirectory = "libraries/pipes/tests/dagster-pipes-tests", rev = "main" }
+dagster-pipes-tests = { git = "https://github.com/dagster-io/community-integrations.git", subdirectory = "libraries/pipes/tests/dagster-pipes-tests", rev = "2102102d210d2fc1427de0789576358f2e9c931c" }

@@ -286,7 +286,7 @@ name = "click"
 version = "8.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de", size = 336121 }
 wheels = [
@@ -376,11 +376,11 @@ dependencies = [
     { name = "jinja2" },
     { name = "packaging" },
     { name = "protobuf" },
-    { name = "psutil", marker = "platform_system == 'Windows'" },
+    { name = "psutil", marker = "sys_platform == 'win32'" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "pytz" },
-    { name = "pywin32", marker = "platform_system == 'Windows'" },
+    { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "pyyaml" },
     { name = "requests" },
     { name = "rich" },
@@ -392,7 +392,7 @@ dependencies = [
     { name = "toposort" },
     { name = "tqdm" },
     { name = "typing-extensions" },
-    { name = "tzdata", marker = "platform_system == 'Windows'" },
+    { name = "tzdata", marker = "sys_platform == 'win32'" },
     { name = "universal-pathlib" },
     { name = "watchdog" },
 ]
@@ -429,7 +429,7 @@ wheels = [
 [[package]]
 name = "dagster-pipes-tests"
 version = "0.1.0"
-source = { git = "https://github.com/dagster-io/community-integrations.git?subdirectory=libraries%2Fpipes%2Ftests%2Fdagster-pipes-tests&rev=main#b9675a62a9766c4b13cf5c39413e20f99604fadf" }
+source = { git = "https://github.com/dagster-io/community-integrations.git?subdirectory=libraries%2Fpipes%2Ftests%2Fdagster-pipes-tests&rev=2102102d210d2fc1427de0789576358f2e9c931c#2102102d210d2fc1427de0789576358f2e9c931c" }
 dependencies = [
     { name = "boto3" },
     { name = "boto3-stubs", extra = ["s3"] },
@@ -676,7 +676,7 @@ dependencies = [
 requires-dist = [
     { name = "dagster", specifier = ">=1.9.5" },
     { name = "dagster-pipes", specifier = ">=1.9.5" },
-    { name = "dagster-pipes-tests", git = "https://github.com/dagster-io/community-integrations.git?subdirectory=libraries%2Fpipes%2Ftests%2Fdagster-pipes-tests&rev=main" },
+    { name = "dagster-pipes-tests", git = "https://github.com/dagster-io/community-integrations.git?subdirectory=libraries%2Fpipes%2Ftests%2Fdagster-pipes-tests&rev=2102102d210d2fc1427de0789576358f2e9c931c" },
     { name = "pytest", specifier = ">=8.3.4" },
 ]
 
@@ -1644,7 +1644,7 @@ name = "tqdm"
 version = "4.67.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a8/4b/29b4ef32e036bb34e4ab51796dd745cdba7ed47ad142a9f4a1eb8e0c744d/tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2", size = 169737 }
 wheels = [
