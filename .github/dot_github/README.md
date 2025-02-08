@@ -1,6 +1,6 @@
 # DotGithub
 
-**TODO: Add description**
+GitHub workflows module for Dagster Pipes Elixir.
 
 ## Installation
 
