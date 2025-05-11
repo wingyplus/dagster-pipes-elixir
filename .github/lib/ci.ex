@@ -17,7 +17,10 @@ defmodule Ci do
     |> Dagger.GhaWorkflow.with_job(
       dag()
       |> Dagger.Client.gha()
-      |> Dagger.Gha.job("check", "init check", runner: ["ubuntu-latest"])
+      |> Dagger.Gha.job("check", "init check",
+        runner: ["ubuntu-latest"],
+        secrets: ["DAGGER_CLOUD_TOKEN"]
+      )
     )
   end
 end

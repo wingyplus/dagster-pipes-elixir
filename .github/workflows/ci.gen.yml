@@ -205,4 +205,5 @@ jobs:
                 exit $EXIT_CODE
               env:
                 COMMAND: dagger call -q init check
+                DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
               shell: bash
