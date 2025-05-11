@@ -61,6 +61,14 @@ defmodule DagsterPipes.PipesTest do
     GenServer.call(pid, :test_name)
   end
 
+  def with_exception(pid) do
+    GenServer.call(pid, {:exception, true})
+  end
+
+  def exception(pid) do
+    GenServer.call(pid, :exception)
+  end
+
   def run(pid, context) do
     test_extras(extras(pid), DagsterPipes.Context.extras(context))
     test_job_name(job_name(pid), DagsterPipes.Context.job_name(context))
@@ -68,6 +76,7 @@ defmodule DagsterPipes.PipesTest do
     test_asset_check(asset_check(pid), context)
     test_custom_payload(custom_payload(pid), context)
     test_error_reporting(test_name(pid), context)
+    test_exception(exception(pid), context)
   end
 
   def test_extras(nil, _), do: :ok
@@ -111,6 +120,9 @@ defmodule DagsterPipes.PipesTest do
   end
 
   def test_error_reporting(_, _), do: :ok
+
+  def test_exception(true, _), do: raise("Very bad error has happened!")
+  def test_exception(false, _), do: :ok
 
   defp severity_from_string("WARN"), do: :WARN
   defp severity_from_string("ERROR"), do: :ERROR
@@ -213,6 +225,16 @@ defmodule DagsterPipes.PipesTest do
   def handle_call(:test_name, _from, state) do
     {:reply, state[:test_name], state}
   end
+
+  @impl true
+  def handle_call({:exception, true}, _from, state) do
+    {:reply, state[:exception], Map.put(state, :exception, true)}
+  end
+
+  @impl true
+  def handle_call(:exception, _from, state) do
+    {:reply, state[:exception] || false, state}
+  end
 end
 
 defmodule MainTest do
@@ -267,6 +289,11 @@ defmodule MainTest do
     pid
   end
 
+  defp set_options({:throw_error, true}, pid) do
+    DagsterPipes.PipesTest.with_exception(pid)
+    pid
+  end
+
   defp set_options(_, pid), do: pid
 
   def parse_options([], acc), do: acc
@@ -316,6 +343,14 @@ defmodule MainTest do
   end
 
   def parse_options(["--custom-payload=" <> value | argv], acc) when is_binary(value) do
+    parse_options(argv, [{:custom_payload_path, value} | acc])
+  end
+
+  def parse_options(["--custom-payload-path", value | argv], acc) when is_binary(value) do
+    parse_options(argv, [{:custom_payload_path, value} | acc])
+  end
+
+  def parse_options(["--custom-payload-path=" <> value | argv], acc) when is_binary(value) do
     parse_options(argv, [{:custom_payload_path, value} | acc])
   end
 
