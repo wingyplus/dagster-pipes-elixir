@@ -1,11 +1,14 @@
 # This file was generated. See https://daggerverse.dev/mod/github.com/dagger/dagger/modules/gha
 name: ci
 "on":
-    pull_request: {}
+    pull_request:
+        branches:
+            - main
     workflow_dispatch: {}
 jobs:
     check:
-        runs-on: []
+        runs-on:
+            - ubuntu-latest
         name: check
         steps:
             - name: Checkout
