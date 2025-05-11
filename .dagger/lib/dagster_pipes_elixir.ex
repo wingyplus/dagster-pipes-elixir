@@ -5,12 +5,39 @@ defmodule DagsterPipesElixir do
 
   use Dagger.Mod.Object, name: "DagsterPipesElixir"
 
+  object do
+    field :source, Dagger.Directory.t()
+    field :container, Dagger.Container.t()
+  end
+
+  defn init(
+         source:
+           {Dagger.Directory.t(),
+            default_path: ".",
+            ignore: [
+              "**/*",
+              "!dagster_pipes/mix.exs",
+              "!dagster_pipes/mix.lock",
+              "!dagster_pipes/test.sh",
+              "!dagster_pipes/lib/**/*.ex",
+              "!dagster_pipes/test/**/*.ex",
+              "!dagster_pipes/test/test_helper.exs",
+              "!dagster_pipes/test/test.exs",
+              "!dagster_pipes/test/**/*_test.exs",
+              "!integration_tests/pipes.toml",
+              "!integration_tests/pyproject.toml",
+              "!integration_tests/uv.lock",
+              "!integration_tests/tests/**/*.py"
+            ]}
+       ) :: DagsterPipesElixir.t() do
+    %DagsterPipesElixir{source: source, container: elixir() |> with_source(source)}
+  end
+
   @doc """
   Run unit test in `dagster_pipes` project.
   """
-  defn unit_test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Void.t() do
-    elixir()
-    |> with_source(source)
+  defn unit_test(self) :: Dagger.Void.t() do
+    self.container
     |> Dagger.Container.with_workdir("dagster_pipes")
     |> Dagger.Container.with_env_variable("MIX_ENV", "test")
     |> Dagger.Container.with_exec(~w"mix deps.get")
@@ -23,9 +50,8 @@ defmodule DagsterPipesElixir do
   @doc """
   Run integration tests provided by Dagster.
   """
-  defn integration_test(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Void.t() do
-    elixir()
-    |> with_source(source)
+  defn integration_test(self) :: Dagger.Void.t() do
+    self.container
     |> Dagger.Container.with_workdir("integration_tests")
     |> Dagger.Container.with_env_variable("PATH", "/root/.local/bin:$PATH", expand: true)
     |> Dagger.Container.with_env_variable("UV_LINK_MODE", "copy")
@@ -36,11 +62,11 @@ defmodule DagsterPipesElixir do
     |> Dagger.Container.sync()
   end
 
-  defn check(source: {Dagger.Directory.t(), default_path: "."}) :: Dagger.Void.t() do
+  defn check(self) :: Dagger.Void.t() do
     results =
       [
-        Task.async(fn -> unit_test(source) end),
-        Task.async(fn -> integration_test(source) end)
+        Task.async(fn -> unit_test(self) end),
+        Task.async(fn -> integration_test(self) end)
       ]
       |> Task.await_many(:infinity)
 

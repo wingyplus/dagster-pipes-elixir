@@ -1,3 +1,4 @@
 /.ropeproject
 .elixir-tools
 __pycache__
+.lexical
