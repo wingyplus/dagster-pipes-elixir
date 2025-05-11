@@ -1,11 +1,11 @@
-defmodule DagsterPipesElixir.MixProject do
+defmodule Template.MixProject do
   use Mix.Project
 
   def project do
     [
       app: :dagster_pipes_elixir,
       version: "0.1.0",
-      elixir: "~> 1.16",
+      elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -13,13 +13,14 @@ defmodule DagsterPipesElixir.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger]
     ]
   end
 
   defp deps do
     [
-      {:dagger, path: "../dagger_sdk"}
+      {:dagger, path: "./dagger_sdk"},
+      {:req, "~> 0.5"}
     ]
   end
 end

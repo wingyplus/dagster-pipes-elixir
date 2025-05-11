@@ -1,9 +1,7 @@
 # This file was generated. See https://daggerverse.dev/mod/github.com/dagger/dagger/modules/gha
 name: ci
 "on":
-    pull_request:
-        branches:
-            - main
+    pull_request: {}
     workflow_dispatch: {}
 jobs:
     check:
@@ -203,5 +201,5 @@ jobs:
 
                 exit $EXIT_CODE
               env:
-                COMMAND: dagger call -q check
+                COMMAND: dagger call -q init check
               shell: bash
